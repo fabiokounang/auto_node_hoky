@@ -14,7 +14,7 @@ app.use(cors({
 app.post('/datesistemdari/:datesistemdarivalue/datesistemke/:datesistemkevalue/nomorrekening/:nomorrekeningid', async (req, res, next) => {
   try {
     const response = await axios({
-      url: `process.env.URL_MUTATION/datesistemdari/${req.params.datesistemdarivalue}/datesistemke/${req.params.datesistemkevalue}/nomorrekening/${req.params.nomorrekeningid}/?time=1649835763977`,
+      url: `${process.env.URL_MUTATION}/datesistemdari/${req.params.datesistemdarivalue}/datesistemke/${req.params.datesistemkevalue}/nomorrekening/${req.params.nomorrekeningid}/?time=1649835763977`,
       method: 'GET',
       headers: { 'Cookie': req.headers.cookie }
     });
