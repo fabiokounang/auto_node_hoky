@@ -4,15 +4,16 @@ const OVOID = require('ovoid');
 const cors = require('cors');
 const axios = require('axios');
 const cookieParser = require('cookie-parser');
-const ovoid = new OVOID();
-const fsPromise = require('fs').promises;
 
 const port = process.env.PORT || 3000;
 const database = require('./util/database');
-const path = require('path');
+const Emoney = require('./models/master-emoney');
+const ovoMiddleware = require('./middleware/ovo-middleware');
 
 app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.post('/api/*', async (req, res, next) => {
   try {
@@ -81,16 +82,94 @@ app.post('/api/*', async (req, res, next) => {
   }
 });
 
-app.post('/ovo/mutation', async (req, res, next) => {
+// OVO API
+app.post('/ovo/login', ovoMiddleware, async (req, res, next) => {
   try {
-    // let refId = await ovoid.login2FA('+6281242994000');
-    // const dataLogin = {
-    //   "otp_refId": "3165a599-0dcd-40b6-9d9d-784fae44dccf",
-    //   "device_id": "1e0bdc25-86ac-4612-91fc-1ec3e5f1dc6b"
-    // }
-    return res.send(dataLogin);
+    const ovoid = new OVOID();
+    let loginResult = await ovoid.login2FA(req.body.phone);
+    console.log(loginResult, 'login result');
+    if (!loginResult.otp_refId || !loginResult.device_id) throw new Error('Login ovo failed');
+    const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, loginResult);
+    if (resultUpdate.affectedRows != 1) throw new Error('Error update login, please try again in a few minutes');
+    return res.send({ status: true });
   } catch (error) {
-    console.log(error);
+    res.send({
+      status: false,
+      error: [error.stack ? error.stack : error.response_message]
+    });
+  }
+});
+
+app.post('/ovo/accesstoken', ovoMiddleware, async (req, res, next) => {
+  try {
+    const ovoid = new OVOID();
+    let dataAuth = JSON.parse(req.dataOvo.auth_emoney);
+    const accessToken = await ovoid.login2FAVerify(dataAuth.otp_refId, req.body.code, req.body.phone, dataAuth.device_id);
+    dataAuth = Object.assign({}, dataAuth, { ...accessToken });
+    const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, dataAuth);
+    if (resultUpdate.affectedRows != 1) throw new Error('Error update access token, please try again in a few minutes');
+    return res.send({ status: true });
+  } catch (error) {
+    await Emoney.deleteAuthLogin(req.body.phone);
+    res.send({
+      status: false,
+      error: [error.stack ? error.stack : error.response_message]
+    });
+  }
+});
+
+app.post('/ovo/confirmpin', ovoMiddleware, async (req, res, next) => {
+  try {
+    let dataAuth = JSON.parse(req.dataOvo.auth_emoney);
+    const ovoid = new OVOID();
+    const authToken = await ovoid.loginSecurityCode(req.body.pin, dataAuth.otp_token, req.body.phone, dataAuth.otp_refId, dataAuth.device_id);
+    console.log(authToken, 'response pin')
+    dataAuth = Object.assign({}, dataAuth, { ...authToken });
+    console.log(dataAuth, 'data auth')
+    const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, dataAuth);
+    if (resultUpdate.affectedRows != 1) throw new Error('Error update access token, please try again in a few minutes');
+    return res.send({ status: true });
+  } catch (error) {
+    await Emoney.deleteAuthLogin(req.body.phone);
+    res.send({
+      status: false,
+      error: [error.stack ? error.stack : error.response_message]
+    });
+  }
+});
+
+app.post('/ovo/balance', ovoMiddleware, async (req, res, next) => {
+  try {
+    const dataAuth = JSON.parse(req.dataOvo.auth_emoney);
+    const ovoid = new OVOID(dataAuth.refresh_token);
+    let profile = await ovoid.getProfile();
+    console.log(JSON.stringify(profile))
+    const balanceCash = await ovoid.getBalance('tipe');
+
+    return res.send({ status: true, data: { balance: balanceCash } });
+  } catch (error) {
+    await Emoney.deleteAuthLogin(req.body.phone);
+    res.send({
+      status: false,
+      error: [error.stack ? error.stack : error.response_message]
+    });
+  }
+});
+
+app.post('/ovo/mutation', ovoMiddleware, async (req, res, next) => {
+  try {
+    const dataAuth = JSON.parse(req.dataOvo.auth_emoney);
+    console.log(dataAuth.refresh_token)
+    const ovoid = new OVOID(dataAuth.refresh_token);
+    const results = await ovoid.getWalletTransaction(req.body.page || 1, req.body.limit || 10);
+    if (results.status == 200) return res.send({ status: true, data: results.data[0] });
+    res.send({ status: true, data: { complete: [], pending: [] } });
+  } catch (error) {
+    await Emoney.deleteAuthLogin(req.body.phone);
+    res.send({
+      status: false,
+      error: [error.stack ? error.stack : error.response_message]
+    });
   }
 });
 
