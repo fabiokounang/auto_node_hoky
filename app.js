@@ -80,7 +80,7 @@ app.post('/api/*', async (req, res, next) => {
     res.send({ status: false, error: error.stack });
   }
 });
-console.log(path.join(__dirname))
+
 app.post('/ovo/mutation', async (req, res, next) => {
   try {
     // let refId = await ovoid.login2FA('+6281242994000');
