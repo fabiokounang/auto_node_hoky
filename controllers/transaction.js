@@ -62,6 +62,6 @@ exports.filterTransaction = async (req, res, next) => {
       res.send({ status: false, content: [], error: 'error.datanotfound' });
     }
   } catch (error) {
-    res.send({ status: false, error: error.stack });
+    res.send({ status: false, error: [error.message] });
   }
 }

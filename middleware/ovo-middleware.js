@@ -3,16 +3,17 @@ const Emoney = require("../models/master-emoney");
 module.exports = async (req, res, next) => {
   try {
     const phone = req.body.phone;
-    if (!phone) throw new Error('Phone required');
-    if (!phone.startsWith('+62')) throw new Error('Phone not valid');
-    if (phone.slice(1).length < 10 || phone.slice(1).length > 14) throw new Error('Phone length not valid');
+    if (!phone) throw new Error('Nomor telepon wajib diisi');
+    if (!phone.startsWith('+62')) throw new Error('Nomor telepon tidak valid (wajib +62)');
+    if (phone.slice(1).length < 10 || phone.slice(1).length > 14) throw new Error('Nomor telepon tidak valid (10-14 digit)');
 
     const [dataOvo] = await Emoney.getDataByPhone(phone);
-    if (dataOvo.length <= 0) throw new Error('Phone not registered');
-    if (req.url.includes('/login') && dataOvo[0].is_login == 1 && dataOvo[0].auth_emoney) throw new Error('This phone number is already logged in, please proceed to transactions');
+    if (dataOvo.length <= 0) throw new Error('Nomor telepon belum terdaftar');
+    if (dataOvo[0].status_emoney != 1) throw new Error('Emoney saat ini sedang tidak aktif');
+    if (req.url.includes('/login') && dataOvo[0].is_login == 1 && dataOvo[0].auth_emoney) throw new Error('Nomor ini sudah login, silahkan mencoba untuk transaksi / logout kemudian relogin');
     req.dataOvo = dataOvo[0];
     next();
   } catch (error) {
-    res.send({ status: false, error: error.stack });
+    res.send({ status: false, error: [error.message] });
   }
 }

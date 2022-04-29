@@ -8,18 +8,20 @@ const port = process.env.PORT || 3000;
 const database = require('./util/database');
 
 const emoney = require('./routes/emoney');
+const emoneyuser = require('./routes/emoneyuser');
 const ovo = require('./routes/ovo');
 const transaction = require('./routes/transaction');
 
 app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 app.use(morgan('combined'));
 
 app.use('/api', transaction);
 app.use('/emoney', emoney);
-app.use('/ovo', ovo);
+app.use('/emoneyuser', emoneyuser);
+app.use('/ovo_emoney', ovo);
 
 database.getConnection().then((database) => {
   console.log('Connected to database ' + database.config.database);

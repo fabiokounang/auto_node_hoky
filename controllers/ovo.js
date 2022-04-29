@@ -5,7 +5,6 @@ exports.login = async (req, res, next) => {
   try {
     const ovoid = new OVOID();
     let loginResult = await ovoid.login2FA(req.body.phone);
-    console.log(loginResult, 'login result');
     if (!loginResult.otp_refId || !loginResult.device_id) throw new Error('Login ovo failed');
     const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, loginResult);
     if (resultUpdate.affectedRows != 1) throw new Error('Error update login, please try again in a few minutes');
@@ -77,7 +76,6 @@ exports.balance = async (req, res, next) => {
 exports.mutation = async (req, res, next) => {
   try {
     const dataAuth = JSON.parse(req.dataOvo.auth_emoney);
-    console.log(dataAuth.refresh_token)
     const ovoid = new OVOID(dataAuth.refresh_token);
     const results = await ovoid.getWalletTransaction(req.body.page || 1, req.body.limit || 10);
     if (results.status == 200) return res.send({ status: true, data: results.data[0] });
@@ -93,8 +91,8 @@ exports.mutation = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
-    if (req.dataOvo.auth_emoney && !req.dataOvo.refresh_token) return res.send({ status: true });
     const dataAuth = JSON.parse(req.dataOvo.auth_emoney);
+    if (!dataAuth || (dataAuth && !dataAuth.refresh_token)) return res.send({ status: true });
     const ovoid = new OVOID(dataAuth.refresh_token);
     const logoutResult = await ovoid.logout();
     const [resultUpdate] = await Emoney.deleteAuthLogin(req.body.phone);
