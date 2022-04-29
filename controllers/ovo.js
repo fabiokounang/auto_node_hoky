@@ -6,7 +6,7 @@ exports.login = async (req, res, next) => {
     const ovoid = new OVOID();
     let loginResult = await ovoid.login2FA(req.body.phone);
     if (!loginResult.otp_refId || !loginResult.device_id) throw new Error('Login ovo failed');
-    const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, loginResult);
+    const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, loginResult, 1);
     if (resultUpdate.affectedRows != 1) throw new Error('Error update login, please try again in a few minutes');
     return res.send({ status: true });
   } catch (error) {
@@ -23,7 +23,7 @@ exports.accesstoken = async (req, res, next) => {
     let dataAuth = JSON.parse(req.dataOvo.auth_emoney);
     const accessToken = await ovoid.login2FAVerify(dataAuth.otp_refId, req.body.code, req.body.phone, dataAuth.device_id);
     dataAuth = Object.assign({}, dataAuth, { ...accessToken });
-    const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, dataAuth);
+    const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, dataAuth, 2);
     if (resultUpdate.affectedRows != 1) throw new Error('Error update access token, please try again in a few minutes');
     return res.send({ status: true });
   } catch (error) {
@@ -40,10 +40,8 @@ exports.confirmpin = async (req, res, next) => {
     let dataAuth = JSON.parse(req.dataOvo.auth_emoney);
     const ovoid = new OVOID();
     const authToken = await ovoid.loginSecurityCode(req.body.pin, dataAuth.otp_token, req.body.phone, dataAuth.otp_refId, dataAuth.device_id);
-    console.log(authToken, 'response pin')
     dataAuth = Object.assign({}, dataAuth, { ...authToken });
-    console.log(dataAuth, 'data auth')
-    const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, dataAuth);
+    const [resultUpdate] = await Emoney.insertAuth(req.dataOvo.id_emoney_user, dataAuth, 3);
     if (resultUpdate.affectedRows != 1) throw new Error('Error update access token, please try again in a few minutes');
     return res.send({ status: true });
   } catch (error) {
@@ -77,6 +75,7 @@ exports.mutation = async (req, res, next) => {
   try {
     const dataAuth = JSON.parse(req.dataOvo.auth_emoney);
     const ovoid = new OVOID(dataAuth.refresh_token);
+    console.log(req.body);
     const results = await ovoid.getWalletTransaction(req.body.page || 1, req.body.limit || 10);
     if (results.status == 200) return res.send({ status: true, data: results.data[0] });
     res.send({ status: true, data: { complete: [], pending: [] } });
@@ -92,11 +91,15 @@ exports.mutation = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
   try {
     const dataAuth = JSON.parse(req.dataOvo.auth_emoney);
-    if (!dataAuth || (dataAuth && !dataAuth.refresh_token)) return res.send({ status: true });
+    if (!dataAuth || (dataAuth && !dataAuth.refresh_token)) {
+      const [resultUpdate] = await Emoney.deleteAuthLogin(req.body.phone);
+      // if (resultUpdate.affectedRows != 1) throw new Error('Error delete login, please try again in a few minutes');
+      return res.send({ status: true });
+    }
     const ovoid = new OVOID(dataAuth.refresh_token);
     const logoutResult = await ovoid.logout();
     const [resultUpdate] = await Emoney.deleteAuthLogin(req.body.phone);
-    if (resultUpdate.affectedRows != 1) throw new Error('Error delete login, please try again in a few minutes');
+    // if (resultUpdate.affectedRows != 1) throw new Error('Error delete login, please try again in a few minutes');
     return res.send({ status: true });
   } catch (error) {
     res.send({

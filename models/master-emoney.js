@@ -34,8 +34,8 @@ module.exports = class Emoney {
     return database.execute(`SELECT meu.id_emoney_user, meu.id_emoney, meu.nomor_emoney, meu.is_login, meu.auth_emoney, me.status_emoney FROM master_emoney_user AS meu JOIN master_emoney AS me ON meu.id_emoney = me.id_emoney WHERE nomor_emoney = ?`, [phone]);
   }
 
-  static insertAuth(id, auth) {
-    return database.execute(`UPDATE master_emoney_user SET is_login = ?, auth_emoney = '${JSON.stringify(auth)}' WHERE id_emoney_user = ?`, [1, id]);
+  static insertAuth(id, auth, state) {
+    return database.execute(`UPDATE master_emoney_user SET is_login = ?, auth_emoney = '${JSON.stringify(auth)}' WHERE id_emoney_user = ?`, [state, id]);
   }
 
   static deleteAuthLogin(phone) {

@@ -18,6 +18,7 @@ exports.getAllEmoneyUser = async (req, res, next) => {
         total: totalData[0].total,
         emoney: resultEmoney,
         values: resultEmoneyUser.map((value) => {
+          value.showInput = false;
           if (value.auth_emoney) value.auth_emoney = JSON.parse(value.auth_emoney);
           return value;
         })
@@ -58,7 +59,8 @@ exports.updateEmoneyUser = async (req, res, next) => {
     console.log(req.body)
     console.log(errors.array())
     if (!errors.isEmpty()) throw new Error('Data request tidak valid');
-    await EmoneyUser.updateEmoneyUser(req.body, req.params.id);
+    const [resultUpdate] = await EmoneyUser.updateEmoneyUser(req.body, req.params.id);
+    console.log(resultUpdate)
     res.send({
       status: true
     });
