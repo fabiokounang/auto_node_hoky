@@ -25,6 +25,21 @@ exports.getAllEmoney = async (req, res, next) => {
   }
 }
 
+exports.getAllEmoneyActive = async (req, res, next) => {
+  try {
+    const [resultEmoney] = await Emoney.getAllEmoneyActive();
+    res.send({
+      status: true,
+      data: resultEmoney
+    });
+  } catch (error) {
+    res.send({
+      status: false,
+      error: [error.stack ? error.stack : error.response_message]
+    });
+  }
+}
+
 exports.createEmoney = async (req, res, next) => {
   try {
     const errors = validationResult(req);

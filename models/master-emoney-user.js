@@ -32,6 +32,9 @@ module.exports = class Emoney {
 
   static deleteAuthLogin(phone) {
     return database.execute(`UPDATE master_emoney_user SET is_login = 0, auth_emoney = NULL WHERE nomor_emoney = ?`, [phone]);
+  }
 
+  static getAllPhoneByEmoney(data) {
+    return database.execute(`SELECT * FROM master_emoney_user WHERE id_emoney = ? AND is_login >= ? AND auth_emoney IS NOT NULL`, [data.id_emoney, 3]);
   }
 }

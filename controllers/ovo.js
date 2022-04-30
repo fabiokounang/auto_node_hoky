@@ -75,10 +75,23 @@ exports.mutation = async (req, res, next) => {
   try {
     const dataAuth = JSON.parse(req.dataOvo.auth_emoney);
     const ovoid = new OVOID(dataAuth.refresh_token);
-    console.log(req.body);
     const results = await ovoid.getWalletTransaction(req.body.page || 1, req.body.limit || 10);
-    if (results.status == 200) return res.send({ status: true, data: results.data[0] });
-    res.send({ status: true, data: { complete: [], pending: [] } });
+    if (results.status == 200) return res.send({
+      status: true,
+      data: {
+        page: req.body.page,
+        limit: req.body.limit,
+        values: [...results.data[0].complete, ...results.data[0].pending]
+      }
+    });
+    res.send({
+      status: true,
+      data: {
+        page: 1,
+        limit: 50,
+        values: []
+      }
+    });
   } catch (error) {
     await Emoney.deleteAuthLogin(req.body.phone);
     res.send({

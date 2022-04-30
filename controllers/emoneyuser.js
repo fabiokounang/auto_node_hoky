@@ -32,6 +32,20 @@ exports.getAllEmoneyUser = async (req, res, next) => {
   }
 }
 
+exports.getAllEmoneyAndPhone = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) throw new Error('Data request tidak valid');
+    const [resultEmoneyPhone] = await EmoneyUser.getAllPhoneByEmoney(req.body);
+    return res.send({ status: true, data: resultEmoneyPhone });
+  } catch (error) {
+    res.send({
+      status: false,
+      error: [error.stack ? error.stack : error.response_message]
+    });
+  }
+}
+
 exports.createEmoneyUser = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -56,11 +70,8 @@ exports.updateEmoneyUser = async (req, res, next) => {
   try {
     if (!req.params.id) throw new Error('Data parameter tidak valid');
     const errors = validationResult(req);
-    console.log(req.body)
-    console.log(errors.array())
     if (!errors.isEmpty()) throw new Error('Data request tidak valid');
     const [resultUpdate] = await EmoneyUser.updateEmoneyUser(req.body, req.params.id);
-    console.log(resultUpdate)
     res.send({
       status: true
     });

@@ -4,6 +4,7 @@ const emoneycontroller = require('../controllers/emoney');
 const { body } = require('express-validator');
 
 router.post('/', emoneycontroller.getAllEmoney);
+router.post('/active', emoneycontroller.getAllEmoneyActive);
 router.post('/create', [
   body('nama_emoney')
     .notEmpty().withMessage('Nama emoney wajib diisi')

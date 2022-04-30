@@ -9,6 +9,7 @@ const database = require('./util/database');
 
 const emoney = require('./routes/emoney');
 const emoneyuser = require('./routes/emoneyuser');
+const emoneymutation = require('./routes/emoneymutation');
 const ovo = require('./routes/ovo');
 const transaction = require('./routes/transaction');
 
@@ -21,6 +22,7 @@ app.use(morgan('combined'));
 app.use('/api', transaction);
 app.use('/emoney', emoney);
 app.use('/emoneyuser', emoneyuser);
+app.use('/emoneymutation', emoneymutation);
 app.use('/ovo_emoney', ovo);
 
 database.getConnection().then((database) => {
