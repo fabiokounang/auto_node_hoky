@@ -51,9 +51,10 @@ exports.createEmoneyUser = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) throw new Error('Data request tidak valid');
     const [emoney] = await Emoney.getEmoneyById(req.body.id_emoney);
-    console.log(emoney)
     if (emoney.length <= 0) throw new Error('Emoney tidak terdaftar di sistem');
     if (emoney[0].status_emoney != 1) throw new Error('Emoney sedang tidak aktif');
+    const [emoneyUser] = await EmoneyUser.getEmoneyByIdAndPhone(req.body.id_emoney, req.body.nomor_emoney);
+    if (emoneyUser.length > 0) throw new Error('Nomor emoney user sudah tidak terdaftar di sistem');
     await EmoneyUser.createEmoneyUser(req.body);
     res.send({
       status: true

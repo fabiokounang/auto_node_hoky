@@ -13,6 +13,10 @@ module.exports = class Emoney {
     return database.execute(query);
   }
 
+  static getEmoneyByIdAndPhone(id, phone) {
+    return database.execute(`SELECT id_emoney, nomor_emoney FROM master_emoney_user WHERE id_emoney = ? AND nomor_emoney = ?`, [id, phone]);
+  }
+
   static getTotalEmoneyUser(query) {
     let queryString = query;
     let tempData = query.split('FROM');
