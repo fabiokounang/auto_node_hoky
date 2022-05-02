@@ -2,17 +2,18 @@ const express = require('express');
 const ovoMiddleware = require('../middleware/ovo-middleware');
 const router = express.Router();
 const ovoController = require('../controllers/ovo');
+const checkAuth = require('../middleware/check-auth');
 
-router.post('/login', ovoMiddleware, ovoController.login);
+router.post('/login', checkAuth, ovoMiddleware, ovoController.login);
 
-router.post('/accesstoken', ovoMiddleware, ovoController.accesstoken);
+router.post('/accesstoken', checkAuth, ovoMiddleware, ovoController.accesstoken);
 
-router.post('/confirmpin', ovoMiddleware, ovoController.confirmpin);
+router.post('/confirmpin', checkAuth, ovoMiddleware, ovoController.confirmpin);
 
-router.post('/balance', ovoMiddleware, ovoController.balance);
+router.post('/balance', checkAuth, ovoMiddleware, ovoController.balance);
 
-router.post('/mutation', ovoMiddleware, ovoController.mutation);
+router.post('/mutation', checkAuth, ovoMiddleware, ovoController.mutation);
 
-router.post('/logout', ovoMiddleware, ovoController.logout);
+router.post('/logout', checkAuth, ovoMiddleware, ovoController.logout);
 
 module.exports = router;

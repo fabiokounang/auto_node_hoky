@@ -7,7 +7,7 @@ exports.getAllEmoneyUser = async (req, res, next) => {
   try {
     const queryData = processQueryEmoneyUser(req.body);
     const [resultEmoney] = await Emoney.getAllEmoneyActive();
-    const [resultEmoneyUser] = await EmoneyUser.getAllEmoneyUser(queryData.query);
+    const [resultEmoneyUser] = await EmoneyUser.getAllEmoneyUserByToko(queryData.query);
     const [totalData] = await EmoneyUser.getTotalEmoneyUser(queryData.query);
     res.send({
       status: true,
@@ -55,7 +55,12 @@ exports.createEmoneyUser = async (req, res, next) => {
     if (emoney[0].status_emoney != 1) throw new Error('Emoney sedang tidak aktif');
     const [emoneyUser] = await EmoneyUser.getEmoneyByIdAndPhone(req.body.id_emoney, req.body.nomor_emoney);
     if (emoneyUser.length > 0) throw new Error('Nomor emoney user sudah tidak terdaftar di sistem');
-    await EmoneyUser.createEmoneyUser(req.body);
+    const objEmoneyUser = {
+      "id_emoney": req.body.id_emoney,
+      "nomor_emoney": req.body.nomor_emoney,
+      "id_toko": req.body.id_toko
+    }
+    await EmoneyUser.createEmoneyUser(objEmoneyUser);
     res.send({
       status: true
     });

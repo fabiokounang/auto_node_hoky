@@ -2,14 +2,18 @@ const database = require('../util/database');
 
 module.exports = class Emoney {
   static createEmoneyUser(data) {
-    return database.execute(`INSERT INTO master_emoney_user (id_emoney, nomor_emoney) VALUES (?, ?)`, [data.id_emoney, data.nomor_emoney]);
+    return database.execute(`INSERT INTO master_emoney_user (id_emoney, nomor_emoney, id_toko) VALUES (?, ?, ?)`, [data.id_emoney, data.nomor_emoney, data.id_toko]);
   }
 
   static updateEmoneyUser(data, id) {
-    return database.execute(`UPDATE master_emoney_user SET nomor_emoney = ? WHERE id_emoney_user = ?`, [data.nomor_emoney, id]);
+    return database.execute(`UPDATE master_emoney_user SET nomor_emoney = ?, id_toko = ? WHERE id_emoney_user = ?`, [data.nomor_emoney, data.id_toko, id]);
   }
 
   static getAllEmoneyUser(query) {
+    return database.execute(query);
+  }
+
+  static getAllEmoneyUserByToko(query) {
     return database.execute(query);
   }
 
