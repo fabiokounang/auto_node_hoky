@@ -2,11 +2,13 @@ const EmoneyUser = require("../models/master-emoney-user");
 const processQueryEmoneyUser = require("../util/process-query-emoney-user");
 const { validationResult } = require('express-validator');
 const Emoney = require("../models/master-emoney");
+const Toko = require('../models/master-toko');
 
 exports.getAllEmoneyUser = async (req, res, next) => {
   try {
-    const queryData = processQueryEmoneyUser(req.body);
+    const queryData = processQueryEmoneyUser(req.body, req.userToko.join(','));
     const [resultEmoney] = await Emoney.getAllEmoneyActive();
+    const [resultToko] = await Toko.getAllTokoactiveByUser(req.userId);
     const [resultEmoneyUser] = await EmoneyUser.getAllEmoneyUserByToko(queryData.query);
     const [totalData] = await EmoneyUser.getTotalEmoneyUser(queryData.query);
     res.send({
@@ -17,6 +19,7 @@ exports.getAllEmoneyUser = async (req, res, next) => {
         max: totalData[0].total > 0 ? Math.ceil(totalData[0].total / queryData.limit) : 1,
         total: totalData[0].total,
         emoney: resultEmoney,
+        toko: resultToko,
         values: resultEmoneyUser.map((value) => {
           value.showInput = false;
           if (value.auth_emoney) value.auth_emoney = JSON.parse(value.auth_emoney);

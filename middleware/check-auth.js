@@ -1,21 +1,15 @@
 const axios = require('axios');
-// console.log(process.env.URL_MUTATION);
+const UserToko = require('../models/master-user-toko');
+
 module.exports = async (req, res, next) => {
-  // var fullUrl = req.protocol + '://' + req.get('host') + '/node' + req.originalUrl;
+  if (!req.headers.id) return res.send({ status: false, error: ['error.notloggedin'] });
+  req.userId = req.headers.id.split('-')[0];
+  req.userType = req.headers.id.split('-')[1];
 
-  // console.log(fullUrl);
-  // console.log(`http://auto-app/master/login/api${req.originalUrl}?time=${Date.now()}`);
-  // console.log({ 'Cookie': req.headers.cookie });
-  // const response = await axios({
-  //   url: `http://auto-app/master/login/api${req.originalUrl}?time=${Date.now()}`,
-  //   method: 'GET',
-  //   headers: { 'Cookie': req.headers.cookie }
-  // });
-  // console.log(response.data);
+  if (!req.userId || !req.userType) return res.send({ status: false, error: ['error.notloggedin'] });
   if (!req.cookies.ci_session) return res.send({ status: false, error: ['error.notloggedin'] });
-
-  // get login ke con2 untuk validasi auth
-  // check type untuk validasi user type
+  const [userToko] = await UserToko.getMasterUserToko(req.userId);
+  req.userToko = userToko.map(val => val.id_toko);
   // company , crud emoneylist, crud emoneyuser, get mutation
   // superadmin, read emoneylist, crud emoneyuser, get mutation
   // admin, read emoneylist, crud emoneyuser, get mutation

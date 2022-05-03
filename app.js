@@ -21,11 +21,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(morgan('combined'));
 
 app.use('/api', transaction);
-// app.use('/emoney', emoney);
-// app.use('/emoneyuser', emoneyuser);
-// app.use('/emoneymutation', emoneymutation);
-// app.use('/ovo_emoney', ovo);
-// app.use('/gopay_emoney', gopay);
+app.use('/emoney', emoney);
+app.use('/emoneyuser', emoneyuser);
+app.use('/emoneymutation', emoneymutation);
+app.use('/ovo_emoney', ovo);
+app.use('/gopay_emoney', gopay);
 
 database.getConnection().then((database) => {
   console.log('Connected to database ' + database.config.database);

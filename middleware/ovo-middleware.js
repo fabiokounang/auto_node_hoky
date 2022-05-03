@@ -11,7 +11,9 @@ module.exports = async (req, res, next) => {
     if (dataOvo.length <= 0) throw new Error('Nomor telepon belum terdaftar');
     if (dataOvo[0].status_emoney != 1) throw new Error('Emoney saat ini sedang tidak aktif');
     if (req.url.includes('/login') && dataOvo[0].is_login >= 3 && dataOvo[0].auth_emoney) throw new Error('Nomor ini sudah login, silahkan mencoba untuk transaksi / logout kemudian relogin');
+    if (!req.userToko.includes(dataOvo[0].id_toko)) throw new Error('Anda tidak memiliki akses untuk data ini');
     req.dataOvo = dataOvo[0];
+
     // 0 belum login
     // 1 access token
     // 2 confirmpin

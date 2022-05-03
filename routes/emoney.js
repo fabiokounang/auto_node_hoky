@@ -3,10 +3,11 @@ const router = express.Router();
 const emoneycontroller = require('../controllers/emoney');
 const { body } = require('express-validator');
 const checkAuth = require('../middleware/check-auth');
+const { checkCompany } = require('../middleware/check-user-type');
 
 router.post('/', checkAuth, emoneycontroller.getAllEmoney);
 router.post('/active', checkAuth, emoneycontroller.getAllEmoneyActive);
-router.post('/create', [
+router.post('/create', checkCompany, [
   body('nama_emoney')
     .notEmpty().withMessage('Nama emoney wajib diisi')
     .isString().withMessage('Data tidak valid'),
@@ -15,7 +16,7 @@ router.post('/create', [
     .isString().withMessage('Data tidak valid')
 ], checkAuth, emoneycontroller.createEmoney);
 
-router.post('/update/:id', [
+router.post('/update/:id', checkAuth, checkCompany, [
   body('nama_emoney')
     .notEmpty().withMessage('Nama emoney wajib diisi')
     .isString().withMessage('Data tidak valid'),

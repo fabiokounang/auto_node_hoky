@@ -31,7 +31,7 @@ module.exports = class Emoney {
   }
 
   static getDataByPhone(phone) {
-    return database.execute(`SELECT meu.id_emoney_user, meu.id_emoney, meu.nomor_emoney, meu.is_login, meu.auth_emoney, me.status_emoney FROM master_emoney_user AS meu JOIN master_emoney AS me ON meu.id_emoney = me.id_emoney WHERE nomor_emoney = ?`, [phone]);
+    return database.execute(`SELECT meu.id_emoney_user, meu.id_emoney, meu.id_toko, meu.nomor_emoney, meu.is_login, meu.auth_emoney, me.status_emoney FROM master_emoney_user AS meu JOIN master_emoney AS me ON meu.id_emoney = me.id_emoney WHERE nomor_emoney = ?`, [phone]);
   }
 
   static insertAuth(id, auth, state) {

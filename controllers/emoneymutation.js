@@ -5,6 +5,7 @@ exports.getMutationOvo = async (req, res, next) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) throw new Error('Data request tidak valid');
+    console.log(req.body)
     const [resultEmoneyPhone] = await EmoneyUser.getAllEmoneyAndPhone(req.body);
     return res.send({ status: true, data: resultEmoneyPhone });
   } catch (error) {

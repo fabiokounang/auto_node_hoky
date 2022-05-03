@@ -15,6 +15,5 @@ module.exports = (data) => {
   if (sort_attr) query += ` ORDER BY ${sort_attr} `;
   if (sort && sort_attr) query += sort;
   if (limit != -1) query += ` LIMIT ${page},${limit}`;
-  console.log(query)
   return { query: query, page: page, limit: limit }
 }
