@@ -76,14 +76,35 @@ exports.mutation = async (req, res, next) => {
     const dataAuth = JSON.parse(req.dataOvo.auth_emoney);
     const ovoid = new OVOID(dataAuth.refresh_token);
     const results = await ovoid.getWalletTransaction(req.body.page || 1, req.body.limit || 10);
-    if (results.status == 200) return res.send({
-      status: true,
-      data: {
-        page: req.body.page,
-        limit: req.body.limit,
-        values: [...results.data[0].complete, ...results.data[0].pending]
-      }
-    });
+    if (results.status == 200) {
+      const finalResult = [...results.data[0].complete, ...results.data[0].pending];
+      // get page 1 (3) 1,2,3
+      // cek ke db ada id 1,2,3
+      // loop
+      // jika ada 1,2 ambil dari db, 
+      // jika tidak ada id 3 save ke tabel mutasi ovo dan tampilkan juga
+      // tambah 1 kolom status
+      // default status 1 (not process)
+      // get page 2 (50) 4,5,6
+
+      // user klik update status id 1
+      // hit api update status jadi 2 (process)
+
+      // get page 1 (3) 1,2,3
+      // cek ke db ada id 1,2,3
+      // ada semua ? get dari db semua
+
+
+
+      return res.send({
+        status: true,
+        data: {
+          page: req.body.page,
+          limit: req.body.limit,
+          values: finalResult
+        }
+      });
+    }
     res.send({
       status: true,
       data: {

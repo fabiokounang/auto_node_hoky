@@ -10,19 +10,23 @@ router.post('/active', checkAuth, emoneycontroller.getAllEmoneyActive);
 router.post('/create', checkCompany, [
   body('nama_emoney')
     .notEmpty().withMessage('Nama emoney wajib diisi')
-    .isString().withMessage('Data tidak valid'),
+    .isString().withMessage('Data tidak valid')
+    .trim(),
   body('alias_emoney')
     .notEmpty().withMessage('Alias emoney wajib diisi')
     .isString().withMessage('Data tidak valid')
+    .trim()
 ], checkAuth, emoneycontroller.createEmoney);
 
 router.post('/update/:id', checkAuth, checkCompany, [
   body('nama_emoney')
     .notEmpty().withMessage('Nama emoney wajib diisi')
-    .isString().withMessage('Data tidak valid'),
+    .isString().withMessage('Data tidak valid')
+    .trim(),
   body('alias_emoney')
     .notEmpty().withMessage('Alias emoney wajib diisi')
-    .isString().withMessage('Data tidak valid'),
+    .isString().withMessage('Data tidak valid')
+    .trim(),
   body('status_emoney')
     .notEmpty().withMessage('Status emoney wajib diisi')
     .custom((value, { req }) => {
