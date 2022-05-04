@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const emoneyUsercontroller = require('../controllers/emoneyuser');
+const ovoMiddleware = require('../middleware/ovo-middleware');
+const ovoController = require('../controllers/ovo');
+
 const { body } = require('express-validator');
 const checkAuth = require('../middleware/check-auth');
-const { checkSuperadmin } = require('../middleware/check-user-type');
+const { checkSuperadmin, checkAdmin } = require('../middleware/check-user-type');
 
 router.post('/', checkAuth, emoneyUsercontroller.getAllEmoneyUser);
 
@@ -12,7 +15,7 @@ router.post('/phones', [
     .notEmpty().withMessage('Emoney wajib dipilih')
 ], checkAuth, emoneyUsercontroller.getAllEmoneyAndPhone);
 
-router.post('/create', checkAuth, checkSuperadmin, [
+router.post('/create', checkAuth, checkAdmin, [
   body('id_emoney')
     .notEmpty().withMessage('Emoney wajib dipilih')
     .isNumeric().withMessage('Data tidak valid'),
@@ -24,7 +27,7 @@ router.post('/create', checkAuth, checkSuperadmin, [
     .isNumeric().withMessage('Data tidak valid')
 ], checkAuth, emoneyUsercontroller.createEmoneyUser);
 
-router.post('/update/:id', checkSuperadmin, [
+router.post('/update/:id', checkAdmin, [
   body('nomor_emoney')
     .notEmpty().withMessage('Nomor emoney wajib diisi')
     .isString().withMessage('Data tidak valid'),
@@ -32,5 +35,11 @@ router.post('/update/:id', checkSuperadmin, [
     .notEmpty().withMessage('Toko wajib dipilih')
     .isNumeric().withMessage('Data tidak valid')
 ], checkAuth, emoneyUsercontroller.updateEmoneyUser);
+
+router.post('/delete/:id', checkAdmin, [
+  body('nomor_emoney')
+    .notEmpty().withMessage('Nomor emoney wajib diisi')
+    .isString().withMessage('Data tidak valid')
+], emoneyUsercontroller.deleteEmoneyUser);
 
 module.exports = router;

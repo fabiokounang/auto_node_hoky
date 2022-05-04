@@ -3,6 +3,7 @@ const processQueryEmoneyUser = require("../util/process-query-emoney-user");
 const { validationResult } = require('express-validator');
 const Emoney = require("../models/master-emoney");
 const Toko = require('../models/master-toko');
+const OVOID = require('ovoid');
 
 exports.getAllEmoneyUser = async (req, res, next) => {
   try {
@@ -84,6 +85,31 @@ exports.updateEmoneyUser = async (req, res, next) => {
     res.send({
       status: true
     });
+  } catch (error) {
+    res.send({
+      status: false,
+      error: [error.message]
+    });
+  }
+}
+
+exports.deleteEmoneyUser = async (req, res, next) => {
+  try {
+    if (!req.params.id) throw new Error('Data parameter tidak valid');
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) throw new Error('Data request tidak valid');
+    const [emoneyUser] = await EmoneyUser.getDataByPhone(req.body.nomor_emoney);
+    if (emoneyUser.length > 0) {
+      if (emoneyUser[0].auth_emoney) {
+        const dataAuth = JSON.parse(emoneyUser[0].auth_emoney);
+        if (dataAuth.refresh_token) {
+          const ovoid = new OVOID(dataAuth.refresh_token);
+          const logoutResult = await ovoid.logout();
+        }
+      }
+    }
+    const [result] = await EmoneyUser.deleteEmoneyUser(req.params.id);
+    res.send({ status: true });
   } catch (error) {
     res.send({
       status: false,
